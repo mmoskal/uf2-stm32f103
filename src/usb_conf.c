@@ -61,12 +61,47 @@ static const struct usb_interface_descriptor dfu_iface = {
     .extralen = sizeof(dfu_function),
 };
 
+static const struct usb_endpoint_descriptor msc_endp[] = {{
+	.bLength = USB_DT_ENDPOINT_SIZE,
+	.bDescriptorType = USB_DT_ENDPOINT,
+	.bEndpointAddress = 0x01,
+	.bmAttributes = USB_ENDPOINT_ATTR_BULK,
+	.wMaxPacketSize = 64,
+	.bInterval = 0,
+}, {
+	.bLength = USB_DT_ENDPOINT_SIZE,
+	.bDescriptorType = USB_DT_ENDPOINT,
+	.bEndpointAddress = 0x82,
+	.bmAttributes = USB_ENDPOINT_ATTR_BULK,
+	.wMaxPacketSize = 64,
+	.bInterval = 0,
+}};
+
+static const struct usb_interface_descriptor msc_iface[] = {{
+	.bLength = USB_DT_INTERFACE_SIZE,
+	.bDescriptorType = USB_DT_INTERFACE,
+	.bInterfaceNumber = 0,
+	.bAlternateSetting = 0,
+	.bNumEndpoints = 2,
+	.bInterfaceClass = USB_CLASS_MSC,
+	.bInterfaceSubClass = USB_MSC_SUBCLASS_SCSI,
+	.bInterfaceProtocol = USB_MSC_PROTOCOL_BBB,
+	.iInterface = 0,
+	.endpoint = msc_endp,
+	.extra = NULL,
+	.extralen = 0
+}};
+
 static const struct usb_interface interfaces[] = {
     /* DFU interface */
     {
         .num_altsetting = 1,
         .altsetting = &dfu_iface,
-    }
+    },
+    {
+        .num_altsetting = 1,
+        .altsetting = &msc_iface,
+    },    
 };
 
 static const struct usb_config_descriptor config = {

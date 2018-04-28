@@ -76,6 +76,8 @@ int main(void) {
 
         usbd_device* usbd_dev = usb_setup();
         dfu_setup(usbd_dev, &target_manifest_app, NULL, NULL);
+       	usb_msc_init(usbd_dev, 0x82, 64, 0x01, 64, "Example Ltd", "UF2 Bootloader",
+		    "42.00", ramdisk_blocks(), ramdisk_read, ramdisk_write);
         webusb_setup(usbd_dev);
         winusb_setup(usbd_dev);
         
