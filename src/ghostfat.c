@@ -42,7 +42,11 @@ typedef struct {
     uint32_t size;
 } __attribute__((packed)) DirEntry;
 
-STATIC_ASSERT(sizeof(DirEntry) == 32);
+static size_t flashSize(void) {
+    return FLASH_SIZE_OVERRIDE;
+}
+
+#define DBG(...) do{}while(0)
 
 struct TextFile {
     const char name[11];
@@ -73,12 +77,12 @@ static const struct TextFile info[] = {
     {.name = "INDEX   HTM", .content = indexFile},
     {.name = "CURRENT UF2"},
 };
-#define NUM_INFO (sizeof(info) / sizeof(info[0]))
+#define NUM_INFO (int)(sizeof(info) / sizeof(info[0]))
 
-#define UF2_SIZE (FLASH_SIZE * 2)
+#define UF2_SIZE (flashSize() * 2)
 #define UF2_SECTORS (UF2_SIZE / 512)
 #define UF2_FIRST_SECTOR (NUM_INFO + 1)
-#define UF2_LAST_SECTOR (UF2_FIRST_SECTOR + UF2_SECTORS - 1)
+#define UF2_LAST_SECTOR (uint32_t)(UF2_FIRST_SECTOR + UF2_SECTORS - 1)
 
 #define RESERVED_SECTORS 1
 #define ROOT_DIR_SECTORS 4
@@ -115,45 +119,30 @@ uint8_t flashBuf[FLASH_PAGE_SIZE] __attribute__((aligned(4)));
 bool firstFlush = true;
 bool hadWrite = false;
 
-void flushFlash() {
+static void flushFlash(void) {
     if (flashAddr == NO_CACHE)
         return;
 
     if (firstFlush) {
-        if (sdRunning) {
-            // disable SD - we need sync access to flash, and we might be also overwriting the SD
-            nrf_sdh_disable_request();
-            nrf_dfu_settings_init(false);
-        }
-
         firstFlush = false;
 
-        s_dfu_settings.write_offset = 0;
-        s_dfu_settings.sd_size = 0;
-        s_dfu_settings.bank_layout = NRF_DFU_BANK_LAYOUT_DUAL;
-        s_dfu_settings.bank_current = NRF_DFU_CURRENT_BANK_0;
-
-        memset(&s_dfu_settings.bank_0, 0, sizeof(s_dfu_settings.bank_0));
-        memset(&s_dfu_settings.bank_1, 0, sizeof(s_dfu_settings.bank_1));
-
-        nrf_dfu_settings_write(NULL);
+        // disable bootloader or something
     }
 
-    int32_t sz = flashAddr + FLASH_PAGE_SIZE;
-    if (s_dfu_settings.bank_0.image_size < sz)
-        s_dfu_settings.bank_0.image_size = sz;
-
-    NRF_LOG_DEBUG("Flush at %x", flashAddr);
+    DBG("Flush at %x", flashAddr);
     if (memcmp(flashBuf, (void *)flashAddr, FLASH_PAGE_SIZE) != 0) {
-        NRF_LOG_DEBUG("Write flush at %x", flashAddr);
-        nrf_nvmc_page_erase(flashAddr);
-        nrf_nvmc_write_words(flashAddr, (uint32_t *)flashBuf, FLASH_PAGE_SIZE / sizeof(uint32_t));
+        DBG("Write flush at %x", flashAddr);
+
+        target_flash_unlock();
+        bool ok = target_flash_program_array((void *)flashAddr, (void*)flashBuf, FLASH_PAGE_SIZE / 2);
+        target_flash_lock();
+        (void)ok;
     }
 
     flashAddr = NO_CACHE;
 }
 
-void flash_write(uint32_t dst, const uint8_t *src, int len) {
+static void flash_write(uint32_t dst, const uint8_t *src, int len) {
     uint32_t newAddr = dst & ~(FLASH_PAGE_SIZE - 1);
 
     hadWrite = true;
@@ -166,6 +155,7 @@ void flash_write(uint32_t dst, const uint8_t *src, int len) {
     memcpy(flashBuf + (dst & (FLASH_PAGE_SIZE - 1)), src, len);
 }
 
+/*
 void uf2_timer(void *p_context) {
     UNUSED_PARAMETER(p_context);
     if (hadWrite) {
@@ -179,10 +169,14 @@ void uf2_timer(void *p_context) {
     }
     NVIC_SystemReset();
 }
+*/
 
-void uf2_timer_start(int ms);
+static void uf2_timer_start(int ms) {
+    (void)ms;
+    // TODO
+}
 
-void padded_memcpy(char *dst, const char *src, int len) {
+static void padded_memcpy(char *dst, const char *src, int len) {
     for (int i = 0; i < len; ++i) {
         if (*src)
             *dst = *src++;
@@ -192,7 +186,7 @@ void padded_memcpy(char *dst, const char *src, int len) {
     }
 }
 
-void read_block(uint32_t block_no, uint8_t *data) {
+int read_block(uint32_t block_no, uint8_t *data) {
     memset(data, 0, 512);
     uint32_t sectionIdx = block_no;
 
@@ -238,25 +232,29 @@ void read_block(uint32_t block_no, uint8_t *data) {
         } else {
             sectionIdx -= NUM_INFO - 1;
             uint32_t addr = sectionIdx * 256;
-            if (addr < FLASH_SIZE) {
+            if (addr < flashSize()) {
                 UF2_Block *bl = (void *)data;
                 bl->magicStart0 = UF2_MAGIC_START0;
                 bl->magicStart1 = UF2_MAGIC_START1;
                 bl->magicEnd = UF2_MAGIC_END;
                 bl->blockNo = sectionIdx;
-                bl->numBlocks = FLASH_SIZE / 256;
+                bl->numBlocks = flashSize() / 256;
                 bl->targetAddr = addr;
                 bl->payloadSize = 256;
                 memcpy(bl->data, (void *)addr, bl->payloadSize);
             }
         }
     }
+
+    return 0;
 }
 
-void write_block(uint32_t block_no, uint8_t *data, bool quiet, WriteState *state) {
-    UF2_Block *bl = (void *)data;
+static void write_block_core(uint32_t block_no, const uint8_t *data, bool quiet, WriteState *state) {
+    const UF2_Block *bl = (const void *)data;
 
-    // NRF_LOG_DEBUG("Write magic: %x", bl->magicStart0);
+    (void)block_no;
+
+    // DBG("Write magic: %x", bl->magicStart0);
 
     if (!is_uf2_block(bl)) {
         return;
@@ -264,16 +262,12 @@ void write_block(uint32_t block_no, uint8_t *data, bool quiet, WriteState *state
 
     if ((bl->flags & UF2_FLAG_NOFLASH) || bl->payloadSize > 256 || (bl->targetAddr & 0xff) ||
         bl->targetAddr < USER_FLASH_START || bl->targetAddr + bl->payloadSize > USER_FLASH_END) {
-#if USE_DBG_MSC
-        if (!quiet)
-            logval("invalid target addr", bl->targetAddr);
-#endif
-        NRF_LOG_WARNING("Skip block at %x", bl->targetAddr);
+        DBG("Skip block at %x", bl->targetAddr);
         // this happens when we're trying to re-flash CURRENT.UF2 file previously
         // copied from a device; we still want to count these blocks to reset properly
     } else {
         // logval("write block at", bl->targetAddr);
-        NRF_LOG_DEBUG("Write block at %x", bl->targetAddr);
+        DBG("Write block at %x", bl->targetAddr);
         flash_write(bl->targetAddr, bl->data, bl->payloadSize);
     }
 
@@ -303,10 +297,22 @@ void write_block(uint32_t block_no, uint8_t *data, bool quiet, WriteState *state
                 }
             }
         }
-        //NRF_LOG_DEBUG("wr %d=%d (of %d)", state->numWritten, bl->blockNo, bl->numBlocks);
+        //DBG("wr %d=%d (of %d)", state->numWritten, bl->blockNo, bl->numBlocks);
     }
 
     if (!isSet && !quiet) {
         // uf2_timer_start(500);
     }
 }
+
+
+WriteState wrState;
+
+int write_block(uint32_t lba, const uint8_t *copy_from)
+{
+    write_block_core(lba, copy_from, true, &wrState);
+    return 0;
+}
+
+
+

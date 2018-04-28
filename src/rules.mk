@@ -184,7 +184,7 @@ locm3: $(LIB_DIR)/lib$(LIBNAME).a
 	$(Q)$(LD) $(LDFLAGS) $(ARCH_FLAGS) $(OBJS) $(LDLIBS) -o $(*).elf
 
 %.o: %.c $(LIB_DIR)/lib$(LIBNAME).a
-	@#printf "  CC      $(*).c\n"
+	@printf "  CC      $(*).c\n"
 	$(Q)$(CC) $(CFLAGS) $(CPPFLAGS) $(ARCH_FLAGS) -o $(*).o -c $(*).c
 
 %.o: %.cxx $(LIB_DIR)/lib$(LIBNAME).a

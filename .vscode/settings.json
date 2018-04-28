@@ -50,5 +50,8 @@
         "**/*.axf": true,
         "**/*.map": true,
         "src/local.mk": true
+    },
+    "files.associations": {
+        "vector.h": "c"
     }
 }

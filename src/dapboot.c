@@ -26,6 +26,9 @@
 #include "webusb.h"
 #include "winusb.h"
 #include "config.h"
+#include "uf2.h"
+
+#include <libopencm3/usb/msc.h>
 
 static inline void __set_MSP(uint32_t topOfMainStack) {
     asm("msr msp, %0" : : "r" (topOfMainStack));
@@ -77,7 +80,7 @@ int main(void) {
         usbd_device* usbd_dev = usb_setup();
         dfu_setup(usbd_dev, &target_manifest_app, NULL, NULL);
        	usb_msc_init(usbd_dev, 0x82, 64, 0x01, 64, "Example Ltd", "UF2 Bootloader",
-		    "42.00", ramdisk_blocks(), ramdisk_read, ramdisk_write);
+		    "42.00", UF2_NUM_BLOCKS, read_block, write_block);
         webusb_setup(usbd_dev);
         winusb_setup(usbd_dev);
         

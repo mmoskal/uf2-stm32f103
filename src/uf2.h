@@ -2,6 +2,8 @@
 #define UF2FORMAT_H 1
 
 #include "uf2cfg.h"
+#include "target.h"
+#include "config.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -15,7 +17,7 @@
 // If set, the block is "comment" and should not be flashed to the device
 #define UF2_FLAG_NOFLASH 0x00000001
 
-#define MAX_BLOCKS (FLASH_SIZE / 256 + 100)
+#define MAX_BLOCKS (FLASH_SIZE_OVERRIDE / 256 + 100)
 typedef struct {
     uint32_t numBlocks;
     uint32_t numWritten;
@@ -50,6 +52,9 @@ typedef struct {
     uint8_t *buffer;
 } UF2_HandoverArgs;
 
+int write_block(uint32_t lba, const uint8_t *copy_from);
+int read_block(uint32_t block_no, uint8_t *data);
+
 typedef void (*UF2_MSC_Handover_Handler)(UF2_HandoverArgs *handover);
 typedef void (*UF2_HID_Handover_Handler)(int ep);
 
@@ -63,14 +68,14 @@ typedef struct {
 
 #define UF2_BINFO ((UF2_BInfo *)(APP_START_ADDRESS - sizeof(UF2_BInfo)))
 
-static inline bool is_uf2_block(void *data) {
-    UF2_Block *bl = (UF2_Block *)data;
+static inline bool is_uf2_block(const void *data) {
+    const UF2_Block *bl = (const UF2_Block *)data;
     return bl->magicStart0 == UF2_MAGIC_START0 && bl->magicStart1 == UF2_MAGIC_START1 &&
            bl->magicEnd == UF2_MAGIC_END;
 }
 
 static inline bool in_uf2_bootloader_space(const void *addr) {
-    return USER_FLASH_END <= (uint32_t)addr && (uint32_t)addr < FLASH_SIZE;
+    return USER_FLASH_END <= (uint32_t)addr && (uint32_t)addr < FLASH_SIZE_OVERRIDE;
 }
 
 

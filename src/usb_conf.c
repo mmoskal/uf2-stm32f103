@@ -25,6 +25,8 @@
 #include "dfu.h"
 #include "webusb.h"
 
+#include <libopencm3/usb/msc.h>
+
 #include "usb_conf.h"
 
 static const struct usb_device_descriptor dev = {
@@ -77,7 +79,7 @@ static const struct usb_endpoint_descriptor msc_endp[] = {{
 	.bInterval = 0,
 }};
 
-static const struct usb_interface_descriptor msc_iface[] = {{
+static const struct usb_interface_descriptor msc_iface = {
 	.bLength = USB_DT_INTERFACE_SIZE,
 	.bDescriptorType = USB_DT_INTERFACE,
 	.bInterfaceNumber = 0,
@@ -90,7 +92,7 @@ static const struct usb_interface_descriptor msc_iface[] = {{
 	.endpoint = msc_endp,
 	.extra = NULL,
 	.extralen = 0
-}};
+};
 
 static const struct usb_interface interfaces[] = {
     /* DFU interface */
