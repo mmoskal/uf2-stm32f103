@@ -26,6 +26,9 @@
 #include <libopencm3/usb/msc.h>
 #include "../lib/usb/usb_private.h"
 
+#include "dmesg.h"
+#define LOG DMESG
+
 /* Definitions of Mass Storage Class from:
  *
  * (A) "Universal Serial Bus Mass Storage Class Bulk-Only Transport
@@ -238,6 +241,7 @@ static void set_sbc_status(usbd_mass_storage *ms,
 			   enum sbc_asc asc,
 			   enum sbc_ascq ascq)
 {
+	LOG("SBC st %d %d %d", key, asc, ascq);
 	ms->sense.key = (uint8_t) key;
 	ms->sense.asc = (uint8_t) asc;
 	ms->sense.ascq = (uint8_t) ascq;
@@ -360,6 +364,28 @@ static void scsi_read_capacity(usbd_mass_storage *ms,
 	}
 }
 
+static void scsi_read_format_capacity(usbd_mass_storage *ms,
+			       struct usb_msc_trans *trans,
+			       enum trans_event event)
+{
+	if (EVENT_CBW_VALID == event) {		
+		trans->msd_buf[0] = 0;
+		trans->msd_buf[1] = 0;
+		trans->msd_buf[2] = 0;
+		trans->msd_buf[3] = 8;
+		trans->msd_buf[4] = ms->block_count >> 24;
+		trans->msd_buf[5] = 0xff & (ms->block_count >> 16);
+		trans->msd_buf[6] = 0xff & (ms->block_count >> 8);
+		trans->msd_buf[7] = 0xff & ms->block_count;
+		trans->msd_buf[8] = 2; // formatted media
+		trans->msd_buf[9] = 0;
+		trans->msd_buf[10] = 512>>8; // block size
+		trans->msd_buf[11] = 0;
+		trans->bytes_to_write = 12;
+		set_sbc_status_good(ms);
+	}
+}
+
 static void scsi_format_unit(usbd_mass_storage *ms,
 			     struct usb_msc_trans *trans,
 			     enum trans_event event)
@@ -446,6 +472,8 @@ static void scsi_inquiry(usbd_mass_storage *ms,
 		buf = get_cbw_buf(trans);
 		evpd = 1 & buf[1];
 
+		evpd = 0; // force response always, otherwise it fails on Windows
+
 		if (0 == evpd) {
 			size_t len;
 			trans->bytes_to_write = sizeof(_spc3_inquiry_response);
@@ -493,6 +521,8 @@ static void scsi_command(usbd_mass_storage *ms,
 		trans->byte_count = 0;
 	}
 
+	LOG("SCSI %x", trans->cbw.cbw.CBWCB[0]);
+
 	switch (trans->cbw.cbw.CBWCB[0]) {
 	case SCSI_TEST_UNIT_READY:
 	case SCSI_SEND_DIAGNOSTIC:
@@ -516,6 +546,9 @@ static void scsi_command(usbd_mass_storage *ms,
 		break;
 	case SCSI_READ_CAPACITY:
 		scsi_read_capacity(ms, trans, event);
+		break;
+	case SCSI_READ_FORMAT_CAPACITIES:
+		scsi_read_format_capacity(ms, trans, event);
 		break;
 	case SCSI_READ_10:
 		scsi_read_10(ms, trans, event);
@@ -743,9 +776,11 @@ static int msc_control_request(usbd_device *usbd_dev,
 
 	switch (req->bRequest) {
 	case USB_MSC_REQ_BULK_ONLY_RESET:
+		LOG("MSC RESET");
 		/* Do any special reset code here. */
 		return USBD_REQ_HANDLED;
 	case USB_MSC_REQ_GET_MAX_LUN:
+		LOG("GET MAX LUN");
 		/* Return the number of LUNs.  We use 0. */
 		*buf[0] = 0;
 		*len = 1;
