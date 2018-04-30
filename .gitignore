@@ -12,6 +12,7 @@ GTAGS
 *.elf
 *.axf
 *.map
+*.uf2
 
 # ignore local makefile settings
 src/local.mk

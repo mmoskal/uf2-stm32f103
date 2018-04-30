@@ -95,6 +95,8 @@ int main(void) {
 
                 int v = msTimer % 1000;
                 target_set_led(v < 100);
+
+                ghostfat_1ms();
             }
 
             usbd_poll(usbd_dev);

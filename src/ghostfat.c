@@ -2,6 +2,7 @@
 #include "uf2.h"
 
 #include <string.h>
+#include <libopencm3/cm3/scb.h>
 
 typedef struct {
     uint8_t JumpInstruction[3];
@@ -114,12 +115,16 @@ static const FAT_BootBlock BootBlock = {
 
 #define NO_CACHE 0xffffffff
 
-uint32_t flashAddr = NO_CACHE;
-uint8_t flashBuf[FLASH_PAGE_SIZE] __attribute__((aligned(4)));
-bool firstFlush = true;
-bool hadWrite = false;
+static uint32_t flashAddr = NO_CACHE;
+static uint8_t flashBuf[FLASH_PAGE_SIZE] __attribute__((aligned(4)));
+static bool firstFlush = true;
+static bool hadWrite = false;
+static uint32_t ms;
+static uint32_t resetTime;
+static uint32_t lastFlush;
 
 static void flushFlash(void) {
+    lastFlush = ms;
     if (flashAddr == NO_CACHE)
         return;
 
@@ -171,9 +176,23 @@ void uf2_timer(void *p_context) {
 }
 */
 
-static void uf2_timer_start(int ms) {
-    (void)ms;
-    // TODO
+static void uf2_timer_start(int delay) {
+    resetTime = ms + delay;
+}
+
+// called roughly every 1ms
+void ghostfat_1ms() {
+    ms++;
+
+    if (resetTime && ms >= resetTime) {
+        flushFlash();
+        scb_reset_system();
+        while (1);
+    }
+
+    if (lastFlush && ms - lastFlush > 100) {
+        flushFlash();
+    }
 }
 
 static void padded_memcpy(char *dst, const char *src, int len) {
@@ -291,10 +310,8 @@ static void write_block_core(uint32_t block_no, const uint8_t *data, bool quiet,
             if (state->numWritten >= state->numBlocks) {
                 // wait a little bit before resetting, to avoid Windows transmit error
                 // https://github.com/Microsoft/uf2-samd21/issues/11
-                if (!quiet) {
-                    uf2_timer_start(30);
-                    isSet = true;
-                }
+                uf2_timer_start(30);
+                isSet = true;
             }
         }
         //DBG("wr %d=%d (of %d)", state->numWritten, bl->blockNo, bl->numBlocks);
