@@ -52,6 +52,7 @@
         "src/local.mk": true
     },
     "files.associations": {
-        "vector.h": "c"
+        "vector.h": "c",
+        "cortex.h": "c"
     }
 }
