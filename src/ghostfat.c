@@ -160,22 +160,6 @@ static void flash_write(uint32_t dst, const uint8_t *src, int len) {
     memcpy(flashBuf + (dst & (FLASH_PAGE_SIZE - 1)), src, len);
 }
 
-/*
-void uf2_timer(void *p_context) {
-    UNUSED_PARAMETER(p_context);
-    if (hadWrite) {
-        flushFlash();
-        s_dfu_settings.bank_0.bank_code = NRF_DFU_BANK_VALID_APP;
-        int32_t start = SD_MAGIC_OK() ? MAIN_APPLICATION_START_ADDR : MBR_SIZE;
-        int32_t sz = s_dfu_settings.bank_0.image_size - start;
-        if (sz > 0)
-            s_dfu_settings.bank_0.image_size = sz;
-        nrf_dfu_settings_write(NULL);
-    }
-    NVIC_SystemReset();
-}
-*/
-
 static void uf2_timer_start(int delay) {
     resetTime = ms + delay;
 }
@@ -310,15 +294,17 @@ static void write_block_core(uint32_t block_no, const uint8_t *data, bool quiet,
             if (state->numWritten >= state->numBlocks) {
                 // wait a little bit before resetting, to avoid Windows transmit error
                 // https://github.com/Microsoft/uf2-samd21/issues/11
-                uf2_timer_start(30);
-                isSet = true;
+                if (!quiet) {
+                    uf2_timer_start(30);
+                    isSet = true;
+                }
             }
         }
         //DBG("wr %d=%d (of %d)", state->numWritten, bl->blockNo, bl->numBlocks);
     }
 
     if (!isSet && !quiet) {
-        // uf2_timer_start(500);
+        uf2_timer_start(500);
     }
 }
 
@@ -327,9 +313,6 @@ WriteState wrState;
 
 int write_block(uint32_t lba, const uint8_t *copy_from)
 {
-    write_block_core(lba, copy_from, true, &wrState);
+    write_block_core(lba, copy_from, false, &wrState);
     return 0;
 }
-
-
-
