@@ -24,7 +24,7 @@
 #include <libopencm3/cm3/common.h>
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/msc.h>
-#include "usb_private.h"
+#include "../lib/usb/usb_private.h"
 
 /* Definitions of Mass Storage Class from:
  *
