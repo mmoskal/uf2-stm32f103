@@ -61,6 +61,8 @@ static void jump_to_application(void) {
     while (1);
 }
 
+uint32_t msTimer;
+
 int main(void) {
     /* Setup clocks */
     target_clock_setup();
@@ -82,8 +84,19 @@ int main(void) {
        	usb_msc_init(usbd_dev, 0x82, 64, 0x01, 64, "Example Ltd", "UF2 Bootloader",
 		    "42.00", UF2_NUM_BLOCKS, read_block, write_block);
         winusb_setup(usbd_dev);
+
+        uint32_t cycleCount = 0;
         
         while (1) {
+            cycleCount++;
+            if (cycleCount >= 700) {
+                msTimer++;
+                cycleCount = 0;
+
+                int v = msTimer % 1000;
+                target_set_led(v < 100);
+            }
+
             usbd_poll(usbd_dev);
         }
     } else {

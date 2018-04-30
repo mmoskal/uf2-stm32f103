@@ -64,6 +64,16 @@ void target_clock_setup(void) {
 #endif
 }
 
+void target_set_led(int on) {
+#if HAVE_LED
+        if ((on && LED_OPEN_DRAIN) || (!on && !LED_OPEN_DRAIN)) {
+            gpio_clear(LED_GPIO_PORT, LED_GPIO_PIN);
+        } else {
+            gpio_set(LED_GPIO_PORT, LED_GPIO_PIN);
+        }
+#endif
+}
+
 void target_gpio_setup(void) {
     /* Enable GPIO clocks */
     if (USES_GPIOA) {
