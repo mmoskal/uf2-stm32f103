@@ -168,7 +168,7 @@ void target_manifest_app(void) {
 }
 
 bool target_get_force_bootloader(void) {
-    bool force = false;
+    bool force = true;
     /* Check the RTC backup register */
     uint32_t cmd = backup_read(BKP0);
     if (cmd == CMD_BOOT) {

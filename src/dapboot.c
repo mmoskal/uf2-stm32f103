@@ -93,8 +93,8 @@ int main(void) {
                 msTimer++;
                 cycleCount = 0;
 
-                int v = msTimer % 1000;
-                target_set_led(v < 100);
+                int v = msTimer % 500;
+                target_set_led(v < 50);
 
                 ghostfat_1ms();
             }
