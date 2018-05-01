@@ -763,6 +763,8 @@ static void msc_data_tx_cb(usbd_device *usbd_dev, uint8_t ep)
 	}
 }
 
+int msc_started = 0;
+
 /** @brief Handle various control requests related to the msc storage
  *	   interface.
  */
@@ -781,6 +783,7 @@ static int msc_control_request(usbd_device *usbd_dev,
 		return USBD_REQ_HANDLED;
 	case USB_MSC_REQ_GET_MAX_LUN:
 		LOG("GET MAX LUN");
+		msc_started = 1;
 		/* Return the number of LUNs.  We use 0. */
 		*buf[0] = 0;
 		*len = 1;

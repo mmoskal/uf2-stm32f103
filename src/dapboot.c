@@ -62,6 +62,7 @@ static void jump_to_application(void) {
 }
 
 uint32_t msTimer;
+extern int msc_started;
 
 int main(void) {
     /* Setup clocks */
@@ -70,7 +71,9 @@ int main(void) {
     /* Initialize GPIO/LEDs if needed */
     target_gpio_setup();
 
-    if (target_get_force_bootloader() || !validate_application()) {
+    bool appValid = validate_application();
+
+    if (target_get_force_bootloader() || !appValid) {
         /* Setup USB */
         {
             char serial[USB_SERIAL_NUM_LENGTH+1];
@@ -97,6 +100,10 @@ int main(void) {
                 target_set_led(v < 50);
 
                 ghostfat_1ms();
+
+                if (appValid && !msc_started && msTimer > 1000) {
+                    target_manifest_app();
+                }
             }
 
             usbd_poll(usbd_dev);
