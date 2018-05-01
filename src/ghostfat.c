@@ -2,7 +2,7 @@
 #include "uf2.h"
 
 #include <string.h>
-#include <libopencm3/cm3/scb.h>
+#include "target.h"
 
 typedef struct {
     uint8_t JumpInstruction[3];
@@ -170,7 +170,7 @@ void ghostfat_1ms() {
 
     if (resetTime && ms >= resetTime) {
         flushFlash();
-        scb_reset_system();
+        target_manifest_app();
         while (1);
     }
 

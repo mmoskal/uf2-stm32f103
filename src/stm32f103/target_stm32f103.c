@@ -51,6 +51,9 @@ _Static_assert((FLASH_BASE + FLASH_SIZE_OVERRIDE >= APP_BASE_ADDRESS),
 #endif
 
 static const uint32_t CMD_BOOT = 0x544F4F42UL;
+static const uint32_t CMD_APP = 0x3f82722aUL;
+
+// #define USE_HSI 1
 
 void target_clock_setup(void) {
 #ifdef USE_HSI
@@ -159,16 +162,28 @@ const usbd_driver* target_usb_init(void) {
     return &st_usbfs_v1_usb_driver;
 }
 
+void target_manifest_app(void) {
+    backup_write(BKP0, CMD_APP);
+    scb_reset_system();
+}
+
 bool target_get_force_bootloader(void) {
     bool force = false;
     /* Check the RTC backup register */
     uint32_t cmd = backup_read(BKP0);
     if (cmd == CMD_BOOT) {
-        force = true;
+        // asked to go into bootloader?
+        backup_write(BKP0, 0);
+        return true;
+    }
+    if (cmd == CMD_APP) {        
+        // we were told to reset into app
+        backup_write(BKP0, 0);
+        return false;
     }
 
-    /* Clear the RTC backup register */
-    backup_write(BKP0, 0);
+    // a reset now should go into app
+    backup_write(BKP0, CMD_APP);
 
 #if HAVE_BUTTON
     /* Check if the user button is held down */
