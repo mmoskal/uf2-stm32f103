@@ -39,6 +39,13 @@ ifeq ($(TARGET),STLINK)
 	LDSCRIPT			:= ./stm32f103/stm32f103x8.ld
 	ARCH				= STM32F1
 endif
+ifeq ($(TARGET),PXT32)
+	TARGET_COMMON_DIR	:= ./stm32f103
+	TARGET_SPEC_DIR		:= ./stm32f103/pxt32
+	LDSCRIPT			:= ./stm32f103/stm32f103x8.ld
+	ARCH				= STM32F1
+	DEFS				+= -DHAVE_LED=1 -DLED_GPIO_PORT=GPIOC -DLED_GPIO_PIN=GPIO13 -DLED_OPEN_DRAIN=1 -DUSES_GPIOC=1
+endif
 
 ifndef ARCH
 $(error Unknown target $(TARGET))

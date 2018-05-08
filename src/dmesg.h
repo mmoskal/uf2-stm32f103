@@ -76,4 +76,6 @@ void codal_vdmesg(const char *format, va_list ap);
 
 #endif
 
+#define NOOP(...) do{}while(0)
+
 #endif

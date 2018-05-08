@@ -27,7 +27,8 @@
 #include "../lib/usb/usb_private.h"
 
 #include "dmesg.h"
-#define LOG DMESG
+// #define LOG DMESG
+#define LOG NOOP
 
 /* Definitions of Mass Storage Class from:
  *
