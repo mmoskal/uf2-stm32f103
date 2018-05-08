@@ -25,6 +25,7 @@
 #define RTC_BKP_DR(reg)  MMIO16(BACKUP_REGS_BASE + 4 + (4 * (reg)))
 
 void backup_write(enum BackupRegister reg, uint32_t value) {
+    /*
     rcc_periph_clock_enable(RCC_PWR);
     rcc_periph_clock_enable(RCC_BKP);
 
@@ -32,10 +33,17 @@ void backup_write(enum BackupRegister reg, uint32_t value) {
     RTC_BKP_DR((int)reg*2) = value & 0xFFFFUL;
     RTC_BKP_DR((int)reg*2+1) = (value & 0xFFFF0000UL) >> 16;
     pwr_enable_backup_domain_write_protect();
+    */
+   (void)reg;
+    *(volatile uint32_t*)0x2000f000 = value;
 }
 
 uint32_t backup_read(enum BackupRegister reg) {
+   (void)reg;
+    return *(volatile uint32_t*)0x2000f000;
+    /*
     uint32_t value = ((uint32_t)RTC_BKP_DR((int)reg*2+1) << 16)
                    | ((uint32_t)RTC_BKP_DR((int)reg*2) << 0);
     return value;
+    */
 }

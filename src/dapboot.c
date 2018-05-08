@@ -65,13 +65,18 @@ uint32_t msTimer;
 extern int msc_started;
 
 int main(void) {
+    bool appValid = validate_application();
+
+    if (appValid && target_get_force_app()) {
+         jump_to_application();
+         return 0;
+    }
+    
     /* Setup clocks */
     target_clock_setup();
 
     /* Initialize GPIO/LEDs if needed */
     target_gpio_setup();
-
-    bool appValid = validate_application();
 
     if (target_get_force_bootloader() || !appValid) {
         /* Setup USB */

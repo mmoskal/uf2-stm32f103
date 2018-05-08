@@ -53,7 +53,7 @@ _Static_assert((FLASH_BASE + FLASH_SIZE_OVERRIDE >= APP_BASE_ADDRESS),
 static const uint32_t CMD_BOOT = 0x544F4F42UL;
 static const uint32_t CMD_APP = 0x3f82722aUL;
 
-// #define USE_HSI 1
+//#define USE_HSI 1
 
 void target_clock_setup(void) {
 #ifdef USE_HSI
@@ -165,6 +165,14 @@ const usbd_driver* target_usb_init(void) {
 void target_manifest_app(void) {
     backup_write(BKP0, CMD_APP);
     scb_reset_system();
+}
+
+bool target_get_force_app(void) {
+    if (backup_read(BKP0) == CMD_APP) {
+        backup_write(BKP0, 0);
+        return true;        
+    }
+    return false;
 }
 
 bool target_get_force_bootloader(void) {

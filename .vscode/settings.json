@@ -53,6 +53,7 @@
     },
     "files.associations": {
         "vector.h": "c",
-        "cortex.h": "c"
+        "cortex.h": "c",
+        "rtc.h": "c"
     }
 }
