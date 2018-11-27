@@ -74,6 +74,8 @@ void target_set_led(int on) {
         } else {
             gpio_set(LED_GPIO_PORT, LED_GPIO_PIN);
         }
+#else
+    (void)on;
 #endif
 }
 
