@@ -79,17 +79,17 @@ void target_set_led(int on) {
 #endif
 }
 
+static void sleep_us(int us){
+    for (int i = 0; i < us*10; i++) {
+        __asm__("nop");
+    }
+}
+
 void target_gpio_setup(void) {
     /* Enable GPIO clocks */
-    if (USES_GPIOA) {
-        rcc_periph_clock_enable(RCC_GPIOA);
-    }
-    if (USES_GPIOB) {
-        rcc_periph_clock_enable(RCC_GPIOB);
-    }
-    if (USES_GPIOC) {
-        rcc_periph_clock_enable(RCC_GPIOC);
-    }
+    rcc_periph_clock_enable(RCC_GPIOA);
+    rcc_periph_clock_enable(RCC_GPIOB);
+    rcc_periph_clock_enable(RCC_GPIOC);
 
     /* Setup LEDs */
 #if HAVE_LED
@@ -140,6 +140,13 @@ void target_gpio_setup(void) {
                       GPIO_CNF_OUTPUT_PUSHPULL, GPIO12);
     }
 #endif
+
+    // TFT
+    // RST
+    gpio_clear(GPIOC, (1 << 4));
+    sleep_us(20000);
+    //gpio_set(GPIOC, (1 << 4));
+    sleep_us(20000);
 }
 
 const usbd_driver* target_usb_init(void) {
