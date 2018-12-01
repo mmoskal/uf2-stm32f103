@@ -244,7 +244,7 @@ int read_block(uint32_t block_no, uint8_t *data) {
                 bl->magicEnd = UF2_MAGIC_END;
                 bl->blockNo = sectionIdx;
                 bl->numBlocks = flashSize() / 256;
-                bl->targetAddr = addr;
+                bl->targetAddr = addr | 0x8000000;
                 bl->payloadSize = 256;
                 memcpy(bl->data, (void *)addr, bl->payloadSize);
             }
