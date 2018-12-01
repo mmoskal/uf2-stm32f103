@@ -37,4 +37,6 @@
 #define HAVE_USB_PULLUP_CONTROL 0
 #endif
 
+#define UF2_FAMILY 0x5ee21072
+
 #endif
