@@ -35,12 +35,12 @@ void backup_write(enum BackupRegister reg, uint32_t value) {
     pwr_enable_backup_domain_write_protect();
     */
    (void)reg;
-    *(volatile uint32_t*)0x2000f000 = value;
+    *(volatile uint32_t*)0x20004000 = value;
 }
 
 uint32_t backup_read(enum BackupRegister reg) {
    (void)reg;
-    return *(volatile uint32_t*)0x2000f000;
+    return *(volatile uint32_t*)0x20004000;
     /*
     uint32_t value = ((uint32_t)RTC_BKP_DR((int)reg*2+1) << 16)
                    | ((uint32_t)RTC_BKP_DR((int)reg*2) << 0);
