@@ -19,6 +19,7 @@
 #include <string.h>
 #include <libopencm3/cm3/vector.h>
 
+#include "uf2.h"
 #include "dapboot.h"
 #include "target.h"
 #include "usb_conf.h"
@@ -26,7 +27,6 @@
 #include "webusb.h"
 #include "winusb.h"
 #include "config.h"
-#include "uf2.h"
 
 #include <libopencm3/usb/msc.h>
 

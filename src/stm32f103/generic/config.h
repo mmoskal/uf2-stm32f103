@@ -37,4 +37,9 @@
 #define HAVE_USB_PULLUP_CONTROL 0
 #endif
 
+#define UF2_FAMILY 0x5ee21072
+
+#undef VOLUME_LABEL
+#define VOLUME_LABEL "BLUEPILL"
+
 #endif
