@@ -136,8 +136,6 @@ LDLIBS     += -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group
 .SECONDEXPANSION:
 .SECONDARY:
 
-all: elf
-
 elf: $(BINARY).elf
 bin: $(BINARY).bin
 hex: $(BINARY).hex
@@ -183,17 +181,9 @@ locm3: $(LIB_DIR)/lib$(LIBNAME).a
 	@#printf "  LD      $(*).elf\n"
 	$(Q)$(LD) $(LDFLAGS) $(ARCH_FLAGS) $(OBJS) $(LDLIBS) -o $(*).elf
 
-%.o: %.c $(LIB_DIR)/lib$(LIBNAME).a
+$(BUILD)/%.o: %.c $(LIB_DIR)/lib$(LIBNAME).a
 	@printf "  CC      $(*).c\n"
-	$(Q)$(CC) $(CFLAGS) $(CPPFLAGS) $(ARCH_FLAGS) -o $(*).o -c $(*).c
-
-%.o: %.cxx $(LIB_DIR)/lib$(LIBNAME).a
-	@#printf "  CXX     $(*).cxx\n"
-	$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(ARCH_FLAGS) -o $(*).o -c $(*).cxx
-
-%.o: %.cpp $(LIB_DIR)/lib$(LIBNAME).a
-	@#printf "  CXX     $(*).cpp\n"
-	$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(ARCH_FLAGS) -o $(*).o -c $(*).cpp
+	$(Q)$(CC) $(CFLAGS) $(CPPFLAGS) $(ARCH_FLAGS) -o $@ -c $(*).c
 
 clean::
 	@#printf "  CLEAN\n"

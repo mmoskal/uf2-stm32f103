@@ -26,14 +26,18 @@ SRCS := $(wildcard *.c)
 SRCS += $(wildcard $(TARGET_COMMON_DIR)/*.c)
 SRCS += $(wildcard $(TARGET_SPEC_DIR)/*.c)
 
-OBJS += $(SRCS:.c=.o)
-DEPS  = $(SRCS:.c=.d)
+BUILD = build
 
-.DEFAULT_GOAL := $(BINARY).bin
+OBJS += $(addprefix $(BUILD)/,$(SRCS:.c=.o))
+DEPS  = $(addprefix $(BUILD)/,$(SRCS:.c=.d))
+
+all: $(BUILD) $(BUILD)/$(BINARY).bin
+
+$(BUILD):
+	mkdir -p $(BUILD)/stm32f103
 
 clean::
-	@rm -f $(OBJS)
-	@rm -f $(DEPS)
+	rm -rf build/
 
 include rules.mk
 
