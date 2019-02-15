@@ -137,7 +137,7 @@ static void flushFlash(void) {
     }
 
     DBG("Flush at %x", flashAddr);
-    if (1 || memcmp(flashBuf, (void *)flashAddr, FLASH_PAGE_SIZE) != 0) {
+    if (memcmp(flashBuf, (void *)flashAddr, FLASH_PAGE_SIZE) != 0) {
         DBG("Write flush at %x", flashAddr);
 
         target_flash_unlock();
