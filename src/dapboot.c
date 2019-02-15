@@ -23,7 +23,6 @@
 #include "dapboot.h"
 #include "target.h"
 #include "usb_conf.h"
-#include "dfu.h"
 #include "webusb.h"
 #include "winusb.h"
 #include "config.h"
@@ -88,7 +87,7 @@ int main(void) {
         }
 
         usbd_device* usbd_dev = usb_setup();
-        dfu_setup(usbd_dev, &target_manifest_app, NULL, NULL);
+        //dfu_setup(usbd_dev, &target_manifest_app, NULL, NULL);
        	usb_msc_init(usbd_dev, 0x82, 64, 0x01, 64, "Example Ltd", "UF2 Bootloader",
 		    "42.00", UF2_NUM_BLOCKS, read_block, write_block);
         winusb_setup(usbd_dev);

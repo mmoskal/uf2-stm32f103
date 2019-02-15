@@ -31,7 +31,9 @@ BUILD = build
 OBJS += $(addprefix $(BUILD)/,$(SRCS:.c=.o))
 DEPS  = $(addprefix $(BUILD)/,$(SRCS:.c=.d))
 
-all: $(BUILD) $(BUILD)/$(BINARY).bin
+ELF = $(BUILD)/$(BINARY).elf
+
+all: $(BUILD) $(BUILD)/$(BINARY).bin size
 
 $(BUILD):
 	mkdir -p $(BUILD)/stm32f103
@@ -41,11 +43,11 @@ clean::
 
 include rules.mk
 
-size: $(OBJS) $(BINARY).elf
-	@$(PREFIX)-size $(OBJS) $(BINARY).elf
+size: $(OBJS) $(ELF)
+	@$(PREFIX)-size $(ELF)
 
-debug: $(BINARY).elf
-	-$(GDB) --eval "target remote | $(OOCD) -f $(OOCD_INTERFACE) -f $(OOCD_BOARD) -f debug.cfg" $(BINARY).elf
+debug: $(ELF)
+	-$(GDB) --eval "target remote | $(OOCD) -f $(OOCD_INTERFACE) -f $(OOCD_BOARD) -f debug.cfg" $(ELF)
 
 erase:
 	$(OOCD) -f $(OOCD_INTERFACE) -f $(OOCD_BOARD) \
