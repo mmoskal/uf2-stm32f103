@@ -13,7 +13,7 @@ You will need a STLink/v2 (or other debugger) to flash it.
 * https://github.com/mmoskal/uf2-stm32f103/releases
 * download the latest ZIP file (`uf2-stm32f103-vX.Y.Z.zip`)
 * run: `openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg -c "program uf2boot-BLUEPILL.bin verify reset exit"`
-* see if `BLUEPILL` drive appears; if not reset the board
+* see if `BLUEPILL` drive appears; if not reset the board; the LED should be fading in and out about once per second
 
 ## Build instructions
 The default target is a generic STM32F103 dev board with an LED on PC13, commonly referred to as a "bluepill" board.
