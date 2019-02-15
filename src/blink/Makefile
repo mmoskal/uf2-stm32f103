@@ -19,7 +19,7 @@
 BINARY = blink
 OPENCM3_DIR = ../../libopencm3
 
-TARGET ?= STM32F103
+TARGET ?= BLUEPILL
 include ../targets.mk
 LDSCRIPT			:= ./stm32f103x8.ld
 

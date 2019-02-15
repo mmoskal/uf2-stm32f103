@@ -16,17 +16,19 @@
 
 -include local.mk
 
-BINARY = dapboot
+BINARY = uf2boot
 OPENCM3_DIR = ../libopencm3
 
-TARGET ?= STM32F103
+UF2_VERSION_BASE = $(shell git describe --dirty --always --tags)
+
+TARGET ?= BLUEPILL
 include targets.mk
 
 SRCS := $(wildcard *.c)
 SRCS += $(wildcard $(TARGET_COMMON_DIR)/*.c)
 SRCS += $(wildcard $(TARGET_SPEC_DIR)/*.c)
 
-BUILD = build
+BUILD = build/$(TARGET)
 
 OBJS += $(addprefix $(BUILD)/,$(SRCS:.c=.o))
 DEPS  = $(addprefix $(BUILD)/,$(SRCS:.c=.d))
@@ -65,3 +67,13 @@ CPPFLAGS += -I.
 # Add target config directory to the header search path
 CPPFLAGS += -I$(TARGET_COMMON_DIR)/
 CPPFLAGS += -I$(TARGET_SPEC_DIR)/
+
+DROPNAME = uf2-stm32f103-$(UF2_VERSION_BASE)
+
+do-drop: all
+	mkdir -p build/$(DROPNAME)
+	cp $(BUILD)/$(BINARY).bin build/$(DROPNAME)/$(BINARY)-$(TARGET).bin
+
+drop:
+	set -e; for t in BLUEPILL PXT32 ; do $(MAKE) TARGET=$$t do-drop ; done
+	cd build; 7z a $(DROPNAME).zip $(DROPNAME)

@@ -14,5 +14,7 @@ GTAGS
 *.map
 *.uf2
 
+build
+
 # ignore local makefile settings
 src/local.mk

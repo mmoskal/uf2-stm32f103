@@ -64,7 +64,7 @@ endif
 # OpenOCD specific variables
 
 OOCD           ?= openocd
-OOCD_INTERFACE ?= interface/cmsis-dap.cfg
+OOCD_INTERFACE ?= interface/stlink-v2.cfg
 OOCD_BOARD     ?= target/stm32f1x.cfg
 
 ####################################################################
@@ -142,8 +142,8 @@ hex: $(BINARY).hex
 srec: $(BINARY).srec
 list: $(BINARY).list
 
-images: $(BINARY).images
-flash: $(BINARY).flash
+images: $(BUILD)/$(BINARY).images
+flash: $(BUILD)/$(BINARY).flash
 
 $(LDSCRIPT):
     ifeq (,$(wildcard $(LDSCRIPT)))
