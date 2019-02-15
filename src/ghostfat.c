@@ -137,7 +137,7 @@ static void flushFlash(void) {
     }
 
     DBG("Flush at %x", flashAddr);
-    if (memcmp(flashBuf, (void *)flashAddr, FLASH_PAGE_SIZE) != 0) {
+    if (1 || memcmp(flashBuf, (void *)flashAddr, FLASH_PAGE_SIZE) != 0) {
         DBG("Write flush at %x", flashAddr);
 
         target_flash_unlock();
@@ -315,6 +315,8 @@ WriteState wrState;
 
 int write_block(uint32_t lba, const uint8_t *copy_from)
 {
+    target_set_led((wrState.numWritten * 17) & 1);
     write_block_core(lba, copy_from, false, &wrState);
+    target_set_led(0);
     return 0;
 }
