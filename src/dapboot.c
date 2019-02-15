@@ -92,16 +92,27 @@ int main(void) {
 		    "42.00", UF2_NUM_BLOCKS, read_block, write_block);
         winusb_setup(usbd_dev);
 
-        uint32_t cycleCount = 0;
+        int cycleCount = 0;
+        int br = 500;
+        int d = 1;
         
         while (1) {
             cycleCount++;
+            
+            target_set_led(cycleCount < br);
+
             if (cycleCount >= 700) {
                 msTimer++;
                 cycleCount = 0;
 
-                int v = msTimer % 500;
-                target_set_led(v < 50);
+                br += d;
+                if (br > 700)
+                    d = -2;
+                else if (br < 10)
+                    d = 2;
+
+                //int v = msTimer % 500;
+                //target_set_led(v < 50);
 
                 ghostfat_1ms();
 
