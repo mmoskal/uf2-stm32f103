@@ -3,6 +3,14 @@
 This project was initially forked off https://github.com/devanlai/dapboot though the DFU functionality has been removed
 and replaced with a USB Mass Storage with [UF2 support](https://github.com/Microsoft/uf2)
 
+## Flashing bootloader from binaries
+
+You will need a STLink/v2 (or other debugger) to flash it.
+
+* https://github.com/mmoskal/uf2-stm32f103/releases
+* download the latest ZIP file (`uf2-stm32f103-vX.Y.Z.zip`)
+* run: `openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg -c "program uf2boot-BLUEPILL.bin verify reset exit"`
+* see if `BLUEPILL` drive appears; if not reset the board
 
 ## Build instructions
 The default target is a generic STM32F103 dev board with an LED on PC13, commonly referred to as a "bluepill" board.
