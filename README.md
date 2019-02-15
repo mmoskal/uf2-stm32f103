@@ -3,6 +3,9 @@
 This project was initially forked off https://github.com/devanlai/dapboot though the DFU functionality has been removed
 and replaced with a USB Mass Storage with [UF2 support](https://github.com/Microsoft/uf2)
 
+Boards with this bootloader can be programmed at https://maker.makecode.com
+using web interface using a graphical programming language or TypeScript (JavaScript with Types).
+
 ## Flashing bootloader from binaries
 
 You will need a STLink/v2 (or other debugger) to flash it.
