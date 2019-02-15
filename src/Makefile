@@ -20,6 +20,7 @@ BINARY = uf2boot
 OPENCM3_DIR = ../libopencm3
 
 UF2_VERSION_BASE = $(shell git describe --dirty --always --tags)
+VER_FLAGS = -DUF2_VERSION='"$(UF2_VERSION_BASE)"'
 
 TARGET ?= BLUEPILL
 include targets.mk
@@ -75,5 +76,6 @@ do-drop: all
 	cp $(BUILD)/$(BINARY).bin build/$(DROPNAME)/$(BINARY)-$(TARGET).bin
 
 drop:
+	rm -rf build
 	set -e; for t in BLUEPILL PXT32 ; do $(MAKE) TARGET=$$t do-drop ; done
 	cd build; 7z a $(DROPNAME).zip $(DROPNAME)

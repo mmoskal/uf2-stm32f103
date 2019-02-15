@@ -183,7 +183,7 @@ locm3: $(LIB_DIR)/lib$(LIBNAME).a
 
 $(BUILD)/%.o: %.c $(LIB_DIR)/lib$(LIBNAME).a
 	@printf "  CC      $(*).c\n"
-	$(Q)$(CC) $(CFLAGS) $(CPPFLAGS) $(ARCH_FLAGS) -o $@ -c $(*).c
+	$(Q)$(CC) $(CFLAGS) $(CPPFLAGS) $(ARCH_FLAGS) $(VER_FLAGS) -o $@ -c $(*).c
 
 clean::
 	@#printf "  CLEAN\n"
