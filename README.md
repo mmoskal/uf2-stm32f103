@@ -12,7 +12,7 @@ You will need a STLink/v2 (or other debugger) to flash it.
 
 * https://github.com/mmoskal/uf2-stm32f103/releases
 * download the latest ZIP file (`uf2-stm32f103-vX.Y.Z.zip`)
-* run: `openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg -c "program uf2boot-BLUEPILL.bin verify reset exit"`
+* run: `openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg -c "program uf2boot-BLUEPILL.bin verify reset exit 0x8000000"`
 * see if `BLUEPILL` drive appears; if not reset the board; the LED should be fading in and out about once per second
 
 ## Build instructions

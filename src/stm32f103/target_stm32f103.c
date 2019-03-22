@@ -63,7 +63,11 @@ void target_clock_setup(void) {
     rcc_clock_setup_in_hsi_out_48mhz();
 #else
     /* Set system clock to 72 MHz from an external crystal */
+    #ifdef CRYSTAL_16MHZ
+    rcc_clock_setup_in_hse_16mhz_out_72mhz();
+    #else
     rcc_clock_setup_in_hse_8mhz_out_72mhz();
+    #endif
 #endif
 }
 
@@ -141,12 +145,21 @@ void target_gpio_setup(void) {
     }
 #endif
 
+#if 0
+    while(1) {
+        target_set_led(1);
+        sleep_us(1200000);
+        target_set_led(0);
+        sleep_us(1200000);
+    }
+
     // TFT
     // RST
     gpio_clear(GPIOC, (1 << 4));
     sleep_us(20000);
     //gpio_set(GPIOC, (1 << 4));
     sleep_us(20000);
+#endif
 }
 
 const usbd_driver* target_usb_init(void) {
