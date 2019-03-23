@@ -143,7 +143,7 @@ srec: $(BINARY).srec
 list: $(BINARY).list
 
 images: $(BUILD)/$(BINARY).images
-flash: $(BUILD)/$(BINARY).flash
+ocd-flash: $(BUILD)/$(BINARY).flash
 
 $(LDSCRIPT):
     ifeq (,$(wildcard $(LDSCRIPT)))

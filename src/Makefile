@@ -49,7 +49,17 @@ include rules.mk
 size: $(OBJS) $(ELF)
 	@$(PREFIX)-size $(ELF)
 
-debug: $(ELF)
+BMP = $(shell ls -1 /dev/cu.usbmodem* | head -1)
+BMP_ARGS = -ex "target extended-remote $(BMP)" -ex "mon swdp_scan" -ex "attach 1"
+GDB = arm-none-eabi-gdb
+
+flash: $(ELF)
+	$(GDB) $(BMP_ARGS) -ex "load" -ex "quit" $(ELF)
+
+gdb: $(ELF)
+	$(GDB) $(BMP_ARGS) $(ELF)
+
+ocd-gdb: $(ELF)
 	-$(GDB) --eval "target remote | $(OOCD) -f $(OOCD_INTERFACE) -f $(OOCD_BOARD) -f debug.cfg" $(ELF)
 
 erase:
