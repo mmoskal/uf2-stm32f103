@@ -46,4 +46,6 @@
 #undef BOARD_ID
 #define BOARD_ID "STM32F103-blue-pill-v0"
 
+//#define DOUBLE_TAP
+
 #endif

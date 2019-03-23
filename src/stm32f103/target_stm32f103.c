@@ -198,6 +198,11 @@ bool target_get_force_app(void) {
 }
 
 bool target_get_force_bootloader(void) {
+    /* Enable GPIO clocks */
+    rcc_periph_clock_enable(RCC_GPIOA);
+    rcc_periph_clock_enable(RCC_GPIOB);
+    rcc_periph_clock_enable(RCC_GPIOC);
+
     bool force = true;
     /* Check the RTC backup register */
     uint32_t cmd = backup_read(BKP0);
@@ -212,8 +217,19 @@ bool target_get_force_bootloader(void) {
         return false;
     }
 
+#ifdef DOUBLE_TAP
+    target_set_led(1);
+    // wait for second press on reset
+    backup_write(BKP0, CMD_BOOT);
+    for (int i = 0; i < 3500000; ++i)
+        asm("nop");
+    backup_write(BKP0, 0);
+    target_set_led(0);
+    force = false;
+#else
     // a reset now should go into app
     backup_write(BKP0, CMD_APP);
+#endif
 
 #if HAVE_BUTTON
     /* Check if the user button is held down */
