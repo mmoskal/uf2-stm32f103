@@ -116,7 +116,7 @@ int main(void) {
 
                 ghostfat_1ms();
 
-                if (appValid && !msc_started && msTimer > 1000) {
+                if (appValid && !msc_started && msTimer > 3000) {
                     target_manifest_app();
                 }
             }
