@@ -87,5 +87,5 @@ do-drop: all
 
 drop:
 	rm -rf build
-	set -e; for t in BLUEPILL PXT32 ; do $(MAKE) TARGET=$$t do-drop ; done
+	set -e; for t in BLUEPILL JACDAC ; do $(MAKE) TARGET=$$t do-drop ; done
 	cd build; 7z a $(DROPNAME).zip $(DROPNAME)
